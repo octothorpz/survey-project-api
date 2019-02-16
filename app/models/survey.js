@@ -33,6 +33,4 @@ const surveySchema = new mongoose.Schema({
   timestamps: true
 })
 
-const Survey = mongoose.model('Survey', surveySchema)
-
-module.exports = Survey
+module.exports = mongoose.model('Survey', surveySchema)

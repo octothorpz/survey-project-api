@@ -60,7 +60,6 @@ router.get('/surveys/:id', requireToken, (req, res, next) => {
 router.post('/surveys', requireToken, (req, res, next) => {
   // set owner of new survey to be current user
   req.body.survey.owner = req.user.id
-
   Survey.create(req.body.survey)
     // respond to succesful `create` with status 201 and JSON of new "survey"
     .then(survey => {
@@ -79,18 +78,21 @@ router.patch('/surveys/:id', requireToken, removeBlanks, (req, res, next) => {
   // owner, prevent that by deleting that key/value pair
   delete req.body.survey.owner
 
-  Survey.findById(req.params.id)
+  Survey.findById(req.params.id).exec()
     .then(handle404)
     .then(survey => {
       // pass the `req` object and the Mongoose record to `requireOwnership`
       // it will throw an error if the current user isn't the owner
       requireOwnership(req, survey)
-
-      // pass the result of Mongoose's `.update` to the next `.then`
-      return survey.update(req.body.survey)
+      // loop through the survey object sent in request
+      for (const key in req.body.survey) {
+        // set new values
+        survey[key] = req.body.survey[key]
+      }
+      return survey.save()
     })
-    // if that succeeded, return 204 and no JSON
-    .then(() => res.sendStatus(204))
+    // if that succeeded, return 200 and the updated survey
+    .then(survey => res.status(200).json({ survey: survey.toObject() }))
     // if an error occurs, pass it to the handler
     .catch(next)
 })
