@@ -5,6 +5,7 @@ const passport = require('passport')
 
 // pull in Mongoose model for surveys
 const Survey = require('../models/survey')
+const Answer = require('../models/answer')
 
 // this is a collection of methods that help us detect situations when we need
 // to throw a custom error
@@ -26,6 +27,41 @@ const requireToken = passport.authenticate('bearer', { session: false })
 
 // instantiate a router (mini app that only handles routes)
 const router = express.Router()
+
+// Compute the survey stats in the form:
+// {option1: 0.3, option2: 0.2, option3: 0.4, option4: 0.1, option5: 0}
+const computeSurveyStats = (survey) => {
+  // find all the answers for this survey
+  return Answer.find({survey: survey.id})
+    .then(answerModels => {
+      const answerCounts = {}
+      // will end up with {'pizza': 5, 'hot dog': 3, 'ice cream': 10}
+      // for favorite food survey
+      // e.g. pizza, pizza, hot dog, ice cream, pizza, hot dog, ice cream, ice cream
+      for (const answerModel of answerModels) {
+        const answer = answerModel.answer // 'pizza'
+        // if answerModel.answer == 'pizza' && stats['pizza'] == null,
+        // then set stats['pizza'] = 1
+        // otherwise, if we've seen 'pizza' before, increment our 'pizza' count
+        if (answerCounts[answer] == null) {
+          answerCounts[answer] = 1
+        } else {
+          answerCounts[answer]++
+        }
+      }
+      const numAnswers = answerModels.length
+      const surveyStats = {}
+      surveyStats[survey.option1] = 0
+      surveyStats[survey.option2] = 0
+      if (survey.option3) surveyStats[survey.option3] = 0
+      if (survey.option4) surveyStats[survey.option4] = 0
+      if (survey.option5) surveyStats[survey.option5] = 0
+      for (const answer in answerCounts) {
+        surveyStats[answer] = answerCounts[answer] / numAnswers
+      }
+      return surveyStats
+    })
+}
 
 // INDEX
 // GET /surveys
@@ -51,6 +87,19 @@ router.get('/surveys/:id', requireToken, (req, res, next) => {
     .then(handle404)
     // if `findById` is succesful, respond with 200 and "survey" JSON
     .then(survey => res.status(200).json({ survey: survey.toObject() }))
+    // if an error occurs, pass it to the handler
+    .catch(next)
+})
+
+// SHOW STATS
+// GET /surveys/5a7db6c74d55bc51bdf39793/stats
+router.get('/surveys/:id/stats', requireToken, (req, res, next) => {
+  // req.params.id will be set based on the `:id` in the route
+  Survey.findById(req.params.id)
+    .then(handle404)
+    .then(survey => computeSurveyStats(survey))
+    // if `findById` is succesful, respond with 200 and "stats" JSON
+    .then(stats => res.status(200).json(stats))
     // if an error occurs, pass it to the handler
     .catch(next)
 })
