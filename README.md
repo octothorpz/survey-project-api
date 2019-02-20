@@ -1,7 +1,7 @@
-```I.M.O
+I.M.O
 ======
 
-I.M.O ('In My Opinion') is a survey application that allows users to login to create, update, and delete surveys of their own along with allowing them to take other people's surveys.
+I.M.O (‘In My Opinion’) is a survey application that allows users to login to create, update, and delete surveys of their own along with allowing them to take other people’s surveys.
 
 Technologies Used
 ------
@@ -31,9 +31,11 @@ User Stories
 Wireframe
 ------
 https://i.imgur.com/kaB7bha.jpg
+https://i.imgur.com/kaB7bha.jpg
 
 Entity Relationship Diagram
 ------
+https://i.imgur.com/vl3Do3a.jpg
 https://i.imgur.com/vl3Do3a.jpg
 
 API Paths & Methods
@@ -98,8 +100,4 @@ Team
 * [Sarah Hale](https://github.com/sars604)
 * [Natalyn Yu](https://github.com/natalynyu)
 * [Greg Smith](https://github.com/g-walkersmith4492)
-* [Anthony Palmoze](https://github.com/Palmoze5)```
-Message Input
-
-
-Message Sarah Hale, Natalyn Yu, Greg Smith
+* [Anthony Palmoze](https://github.com/Palmoze5)
